@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+        overflow: auto;
+        font-size: 14px;
+      }
+      
+      h2 {
+        margin-top: 0;
+        color: #222;
+      }
+      
+      p {
+        color: #666;
+        line-height: 1.5;
+      }
+      
+      .button-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      
+      button {
+        border: none;
+        border-radius: 6px;
+        padding: 12px 16px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      
+      button:focus {
+        outline: none;
+      }
+      
+      button:hover {
+        opacity: 0.9;
+      }
+      
+      .primary-button {
+        background-color: #18A0FB;
+        color: white;
+      }
+      
+      .secondary-button {
+        background-color: #F5F5F5;
+        color: #333;
+      }
+      
+      .message {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
+      
+      .success {
+        background-color: #E3F5E9;
+        color: #1E7F4C;
+      }
+      
+      .error {
+        background-color: #FFEBEE;
+        color: #C62828;
+      }
+      
+      .info {
+        background-color: #E3F2FD;
+        color: #1565C0;
+      }
+      
+      .hidden {
+        display: none;
+      }
+      
+      .steps {
+        background-color: #F5F5F5;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+      }
+      
+      .steps ol {
+        margin: 0;
+        padding-left: 20px;
+      }
+      
+      .steps li {
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Color Palette Extractor</h2>
+    
+    <div class="steps">
+      <ol>
+        <li>Select a parent frame in your Figma workspace</li>
+        <li>Click "Extract Colors" to analyze all layers inside</li>
+        <li>A new frame with your color palette will be created</li>
+      </ol>
+    </div>
+    
+    <div class="button-container">
+      <button id="extract-button" class="primary-button">Extract Colors</button>
+      <button id="create-styles-button" class="secondary-button hidden">Create Color Styles</button>
+      <button id="cancel-button" class="secondary-button">Cancel</button>
+    </div>
+    
+    <div id="message" class="message hidden"></div>
+    
+    <script>
+      // Variables to store the extracted colors
+      let extractedColors = [];
+      
+      // Button references
+      const extractButton = document.getElementById('extract-button');
+      const createStylesButton = document.getElementById('create-styles-button');
+      const cancelButton = document.getElementById('cancel-button');
+      const messageElement = document.getElementById('message');
+      
+      // Function to show a message to the user
+      function showMessage(text, type) {
+        messageElement.textContent = text;
+        messageElement.className = `message ${type}`;
+        messageElement.classList.remove('hidden');
+      }
+      
+      // Add event listeners
+      extractButton.addEventListener('click', () => {
+        // Reset any previous messages
+        messageElement.classList.add('hidden');
+        createStylesButton.classList.add('hidden');
+        
+        // Tell the plugin to extract colors
+        parent.postMessage({ pluginMessage: { type: 'extract-colors' } }, '*');
+      });
+      
+      createStylesButton.addEventListener('click', () => {
+        // Tell the plugin to create color styles
+        parent.postMessage({ 
+          pluginMessage: { 
+            type: 'create-styles',
+            colors: JSON.stringify(extractedColors)
+          } 
+        }, '*');
+      });
+      
+      cancelButton.addEventListener('click', () => {
+        parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+      });
+      
+      // Listen for messages from the plugin
+      window.onmessage = (event) => {
+        const message = event.data.pluginMessage;
+        
+        if (!message) return;
+        
+        if (message.type === 'success') {
+          showMessage(message.message, 'success');
+          
+          // If the success was for extracting colors, show the create styles button
+          if (message.message.includes('palette')) {
+            extractedColors = message.colors || [];
+            createStylesButton.classList.remove('hidden');
+          }
+        } else if (message.type === 'error') {
+          showMessage(message.message, 'error');
+        } else if (message.type === 'progress') {
+          showMessage(message.message, 'info');
+        }
+      };
+    </script>
+  </body>
+</html>
