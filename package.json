@@ -1,5 +1,5 @@
 {
-  "name": "Filla---Color-Palette-Extractor",
+  "name": "filla-color-palette-extractor",
   "version": "1.0.0",
   "description": "Your Figma Plugin",
   "main": "code.js",
