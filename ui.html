@@ -2,99 +2,161 @@
 <html>
   <head>
     <style>
+      :root {
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        
+        /* Light Theme (default) */
+        --bg-color: #FFFFFF;
+        --text-color: #333333;
+        --text-color-muted: #666666;
+        --primary-button-bg: #18A0FB;
+        --primary-button-text: #FFFFFF;
+        --secondary-button-bg: #F0F0F0;
+        --secondary-button-text: #333333;
+        --message-success-bg: #E3F5E9;
+        --message-success-text: #1E7F4C;
+        --message-error-bg: #FFEBEE;
+        --message-error-text: #C62828;
+        --message-info-bg: #E3F2FD;
+        --message-info-text: #1565C0;
+        --steps-bg: #F5F5F5;
+        --border-color: #E0E0E0;
+      }
+
+      html.figma-dark { /* Applied by Figma for dark mode */
+        /* Dark Theme Overrides */
+        --bg-color: #2C2C2C;
+        --text-color: #E0E0E0;
+        --text-color-muted: #AAAAAA;
+        /* --primary-button-bg: #18A0FB; /* No change from light, can be omitted here */
+        /* --primary-button-text: #FFFFFF; /* No change from light, can be omitted here */
+        --secondary-button-bg: #424242;
+        --secondary-button-text: #E0E0E0;
+        --message-success-bg: #1E7F4C;
+        --message-success-text: #E3F5E9;
+        --message-error-bg: #C62828;
+        --message-error-text: #FFEBEE;
+        --message-info-bg: #1565C0;
+        --message-info-text: #E3F2FD;
+        --steps-bg: #383838;
+        --border-color: #555555;
+      }
+
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        font-family: var(--font-family);
         margin: 0;
-        padding: 20px;
-        color: #333;
+        padding: 24px; /* Increased padding */
+        background-color: var(--bg-color);
+        color: var(--text-color);
         overflow: auto;
         font-size: 14px;
+        line-height: 1.6; /* Improved line height */
+        transition: background-color 0.3s, color 0.3s; /* Smooth theme transition */
       }
       
       h2 {
         margin-top: 0;
-        color: #222;
+        margin-bottom: 12px; /* Added bottom margin */
+        color: var(--text-color);
+        font-size: 20px; /* Slightly larger */
+        font-weight: 600; /* Bolder */
       }
       
       p {
-        color: #666;
+        color: var(--text-color-muted);
         line-height: 1.5;
+        margin-bottom: 16px; /* Added bottom margin */
       }
       
       .button-container {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        margin-top: 16px;
+        gap: 10px; /* Increased gap */
+        margin-top: 20px; /* Adjusted margin */
       }
       
       button {
-        border: none;
-        border-radius: 6px;
-        padding: 12px 16px;
+        border: 1px solid transparent; /* Prepare for potential borders */
+        border-radius: 8px; /* Slightly more rounded */
+        padding: 12px 18px; /* Adjusted padding */
         cursor: pointer;
         font-weight: 500;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s, opacity 0.2s, border-color 0.2s;
+        text-align: center;
       }
       
       button:focus {
         outline: none;
+        box-shadow: 0 0 0 2px var(--primary-button-bg); /* Focus ring with variable */
       }
       
       button:hover {
-        opacity: 0.9;
+        opacity: 0.85; /* Slightly adjusted hover */
       }
       
       .primary-button {
-        background-color: #18A0FB;
-        color: white;
+        background-color: var(--primary-button-bg);
+        color: var(--primary-button-text);
       }
       
       .secondary-button {
-        background-color: #F5F5F5;
-        color: #333;
+        background-color: var(--secondary-button-bg);
+        color: var(--secondary-button-text);
+        border: 1px solid var(--border-color); /* Added border for definition */
+      }
+
+      .secondary-button:hover {
+        background-color: var(--border-color); /* Subtle hover for secondary */
       }
       
       .message {
-        margin-top: 16px;
-        padding: 12px;
-        border-radius: 6px;
+        margin-top: 20px; /* Adjusted margin */
+        padding: 14px;    /* Increased padding */
+        border-radius: 8px; /* Consistent rounding */
         font-size: 13px;
+        line-height: 1.4;
       }
       
       .success {
-        background-color: #E3F5E9;
-        color: #1E7F4C;
+        background-color: var(--message-success-bg);
+        color: var(--message-success-text);
       }
       
       .error {
-        background-color: #FFEBEE;
-        color: #C62828;
+        background-color: var(--message-error-bg);
+        color: var(--message-error-text);
       }
       
       .info {
-        background-color: #E3F2FD;
-        color: #1565C0;
+        background-color: var(--message-info-bg);
+        color: var(--message-info-text);
       }
       
       .hidden {
-        display: none;
+        display: none !important; /* Added !important to ensure it overrides */
       }
       
       .steps {
-        background-color: #F5F5F5;
-        padding: 12px;
-        border-radius: 6px;
-        margin-bottom: 16px;
+        background-color: var(--steps-bg);
+        padding: 16px; /* Increased padding */
+        border-radius: 8px; /* Consistent rounding */
+        margin-bottom: 20px; /* Adjusted margin */
+        border: 1px solid var(--border-color); /* Subtle border */
       }
       
       .steps ol {
         margin: 0;
         padding-left: 20px;
+        color: var(--text-color-muted);
       }
       
       .steps li {
         margin-bottom: 8px;
+        font-size: 13px; /* Slightly smaller for steps */
+      }
+
+      .steps li:last-child {
+        margin-bottom: 0; /* Remove bottom margin from last item */
       }
     </style>
   </head>
@@ -131,7 +193,6 @@
       function showMessage(text, type) {
         messageElement.textContent = text;
         messageElement.className = `message ${type}`;
-        messageElement.classList.remove('hidden');
       }
       
       // Add event listeners
@@ -163,9 +224,10 @@
         const message = event.data.pluginMessage;
         
         if (!message) return;
-        
+
         if (message.type === 'success') {
           showMessage(message.message, 'success');
+          messageElement.classList.remove('hidden'); // Show message
           
           // If the success was for extracting colors, show the create styles button
           if (message.message.includes('palette')) {
@@ -174,8 +236,10 @@
           }
         } else if (message.type === 'error') {
           showMessage(message.message, 'error');
+          messageElement.classList.remove('hidden'); // Show message
         } else if (message.type === 'progress') {
           showMessage(message.message, 'info');
+          messageElement.classList.remove('hidden'); // Show message
         }
       };
     </script>
