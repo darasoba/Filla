@@ -199,13 +199,22 @@
       extractButton.addEventListener('click', () => {
         // Reset any previous messages
         messageElement.classList.add('hidden');
-        createStylesButton.classList.add('hidden');
+        createStylesButton.classList.add('hidden'); // Ensure it's hidden
+        createStylesButton.disabled = true; // And disabled
+        
+        // Show debug message
+        showMessage('Sending extract-colors request...', 'info');
+        messageElement.classList.remove('hidden');
         
         // Tell the plugin to extract colors
         parent.postMessage({ pluginMessage: { type: 'extract-colors' } }, '*');
       });
       
       createStylesButton.addEventListener('click', () => {
+        // Show debug message
+        showMessage('Sending create-styles request...', 'info');
+        messageElement.classList.remove('hidden');
+        
         // Tell the plugin to create color styles
         parent.postMessage({ 
           pluginMessage: { 
@@ -221,25 +230,43 @@
       
       // Listen for messages from the plugin
       window.onmessage = (event) => {
-        const message = event.data.pluginMessage;
+        console.log('Message received in UI:', event.data);
         
-        if (!message) return;
-
-        if (message.type === 'success') {
-          showMessage(message.message, 'success');
-          messageElement.classList.remove('hidden'); // Show message
+        try {
+          // Figma plugin messages come in event.data.pluginMessage
+          const message = event.data.pluginMessage;
           
-          // If the success was for extracting colors, show the create styles button
-          if (message.message.includes('palette')) {
-            extractedColors = message.colors || [];
-            createStylesButton.classList.remove('hidden');
+          if (!message) {
+            console.log('No pluginMessage in event.data');
+            return;
           }
-        } else if (message.type === 'error') {
-          showMessage(message.message, 'error');
-          messageElement.classList.remove('hidden'); // Show message
-        } else if (message.type === 'progress') {
-          showMessage(message.message, 'info');
-          messageElement.classList.remove('hidden'); // Show message
+          
+          console.log('Processing message type:', message.type);
+  
+          if (message.type === 'success') {
+            showMessage(message.message, 'success');
+            messageElement.classList.remove('hidden'); // Show message
+            
+            // If the success was for extracting colors, show and enable the create styles button
+            if (message.message.includes('palette')) {
+              console.log('Color palette created, showing "Create Color Styles" button');
+              extractedColors = message.colors || [];
+              createStylesButton.classList.remove('hidden'); // Show the button
+              createStylesButton.disabled = false; // Enable the button
+            }
+          } else if (message.type === 'error') {
+            showMessage(message.message, 'error');
+            messageElement.classList.remove('hidden'); // Show message
+          } else if (message.type === 'progress') {
+            showMessage(message.message, 'info');
+            messageElement.classList.remove('hidden'); // Show message
+          } else {
+            console.log('Unknown message type:', message.type);
+          }
+        } catch (error) {
+          console.error('Error processing message:', error);
+          showMessage('An error occurred: ' + error.message, 'error');
+          messageElement.classList.remove('hidden');
         }
       };
     </script>
