@@ -83,6 +83,7 @@
         font-weight: 500;
         transition: background-color 0.2s, opacity 0.2s, border-color 0.2s;
         text-align: center;
+        display: block; /* Ensure buttons display as blocks */
       }
       
       button:focus {
@@ -134,6 +135,7 @@
       
       .hidden {
         display: none !important; /* Added !important to ensure it overrides */
+        visibility: hidden !important; /* Double ensure with visibility */
       }
       
       .steps {
@@ -163,6 +165,8 @@
   <body>
     <h2>Color Palette Extractor</h2>
     
+    <div id="message" class="message hidden"></div>
+    
     <div class="steps">
       <ol>
         <li>Select a parent frame in your Figma workspace</li>
@@ -174,15 +178,15 @@
     
     <div class="button-container">
       <button id="extract-button" class="primary-button">Extract Colors</button>
-      <button id="create-styles-button" class="secondary-button hidden">Create Color Styles</button>
+      <button id="create-styles-button" class="secondary-button" style="display: none;">Create Color Styles</button>
       <!-- <button id="cancel-button" class="secondary-button">Cancel</button> -->
     </div>
-    
-    <div id="message" class="message hidden"></div>
     
     <script>
       // Variables to store the extracted colors
       let extractedColors = [];
+      let messageTimeout; // Variable to store the timeout ID
+      let buttonCheckInterval; // Variable to store the interval ID for button checks
       
       // Button references
       const extractButton = document.getElementById('extract-button');
@@ -193,8 +197,113 @@
       // Function to show a message to the user
       function showMessage(text, type) {
         messageElement.textContent = text;
-        messageElement.className = `message ${type}`;
+        messageElement.className = `message ${type}`; // This makes it visible
+        messageElement.classList.remove('hidden'); // Ensure it's visible
+
+        // Clear any existing timeout
+        if (messageTimeout) {
+          clearTimeout(messageTimeout);
+        }
+
+        // Set a timeout to hide the message after 5 seconds
+        messageTimeout = setTimeout(() => {
+          messageElement.classList.add('hidden');
+        }, 5000);
       }
+      
+      // Function to ensure the create styles button is visible and working
+      function showCreateStylesButton(colors) {
+        console.log('UI.HTML: Attempting to show Create Styles button with multiple methods');
+        extractedColors = colors || [];
+        
+        // Try all known methods to make the button visible
+        if (createStylesButton) {
+          createStylesButton.classList.remove('hidden');
+          createStylesButton.style.display = 'block';
+          createStylesButton.style.visibility = 'visible';
+          createStylesButton.disabled = false;
+        } else {
+          console.log('UI.HTML: Create Styles button not found, creating a new one');
+          
+          // Create a new button if the original is somehow not accessible
+          const buttonContainer = document.querySelector('.button-container');
+          if (buttonContainer) {
+            // Remove old button if it exists but is inaccessible
+            const oldButton = document.getElementById('create-styles-button');
+            if (oldButton) buttonContainer.removeChild(oldButton);
+            
+            // Create and append new button
+            const newButton = document.createElement('button');
+            newButton.id = 'create-styles-button';
+            newButton.className = 'secondary-button';
+            newButton.textContent = 'Create Color Styles';
+            newButton.style.display = 'block';
+            
+            // Add event listener
+            newButton.addEventListener('click', () => {
+              showMessage('Creating color styles...', 'info');
+              parent.postMessage({ 
+                pluginMessage: { 
+                  type: 'create-styles',
+                  colors: JSON.stringify(extractedColors)
+                } 
+              }, '*');
+            });
+            
+            buttonContainer.appendChild(newButton);
+            createStylesButton = newButton; // Update the reference
+          }
+        }
+        
+        console.log('UI.HTML: Button visibility status:', 
+                   createStylesButton.style.display,
+                   createStylesButton.style.visibility,
+                   !createStylesButton.classList.contains('hidden'));
+      }
+      
+      // Initialize buttons and elements when the page loads
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('UI.HTML: DOM fully loaded, initializing elements');
+        
+        // Ensure create-styles-button exists or create it if it doesn't
+        if (!document.getElementById('create-styles-button')) {
+          console.log('UI.HTML: Create Styles button not found at load, creating one');
+          const buttonContainer = document.querySelector('.button-container');
+          
+          if (buttonContainer) {
+            const newButton = document.createElement('button');
+            newButton.id = 'create-styles-button';
+            newButton.className = 'secondary-button hidden';
+            newButton.textContent = 'Create Color Styles';
+            newButton.style.display = 'none';
+            
+            newButton.addEventListener('click', () => {
+              console.log('UI.HTML: Create Styles button clicked');
+              showMessage('Creating color styles...', 'info');
+              parent.postMessage({ 
+                pluginMessage: { 
+                  type: 'create-styles',
+                  colors: JSON.stringify(extractedColors)
+                } 
+              }, '*');
+            });
+            
+            buttonContainer.appendChild(newButton);
+            createStylesButton = newButton;
+          }
+        } else {
+          console.log('UI.HTML: Create Styles button found at load, ensuring hidden');
+          createStylesButton = document.getElementById('create-styles-button');
+          createStylesButton.classList.add('hidden');
+          createStylesButton.style.display = 'none';
+        }
+        
+        // Log the initial state of the button
+        console.log('UI.HTML: Initial button state:', createStylesButton ? 
+                   `display=${getComputedStyle(createStylesButton).display}, 
+                    visibility=${getComputedStyle(createStylesButton).visibility}` : 
+                   'button not found');
+      });
       
       // Add event listeners
       extractButton.addEventListener('click', () => {
@@ -203,18 +312,16 @@
         createStylesButton.classList.add('hidden'); // Ensure it's hidden
         createStylesButton.disabled = true; // And disabled
         
-        // Show debug message
-        showMessage('Sending extract-colors request...', 'info');
-        messageElement.classList.remove('hidden');
+        // showMessage('Sending extract-colors request...', 'info');
+        // messageElement.classList.remove('hidden');
         
         // Tell the plugin to extract colors
         parent.postMessage({ pluginMessage: { type: 'extract-colors' } }, '*');
       });
       
       createStylesButton.addEventListener('click', () => {
-        // Show debug message
-        showMessage('Sending create-styles request...', 'info');
-        messageElement.classList.remove('hidden');
+        // showMessage('Sending create-styles request...', 'info');
+        // messageElement.classList.remove('hidden');
         
         // Tell the plugin to create color styles
         parent.postMessage({ 
@@ -225,49 +332,77 @@
         }, '*');
       });
       
-      cancelButton.addEventListener('click', () => {
-        parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
-      });
+      if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+          parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+        });
+      }
       
       // Listen for messages from the plugin
       window.onmessage = (event) => {
-        console.log('Message received in UI:', event.data);
+        console.log('UI.HTML: Message received in UI:', event.data);
         
         try {
           // Figma plugin messages come in event.data.pluginMessage
           const message = event.data.pluginMessage;
           
           if (!message) {
-            console.log('No pluginMessage in event.data');
+            console.log('UI.HTML: No pluginMessage in event.data');
             return;
           }
           
-          console.log('Processing message type:', message.type);
+          console.log('UI.HTML: Processing message type:', message.type, 'Payload:', message);
   
           if (message.type === 'success') {
             showMessage(message.message, 'success');
-            messageElement.classList.remove('hidden'); // Show message
+            
+            // Use multiple conditions to robustly check if we should show the button
+            console.log('UI.HTML: Checking paletteExtracted flag:', message.paletteExtracted);
             
             // If the success was for extracting colors, show and enable the create styles button
-            if (message.message.includes('palette')) {
-              console.log('Color palette created, showing "Create Color Styles" button');
-              extractedColors = message.colors || [];
-              createStylesButton.classList.remove('hidden'); // Show the button
-              createStylesButton.disabled = false; // Enable the button
+            if (message.paletteExtracted === true || 
+                (message.message && message.message.includes('palette')) || 
+                (message.colors && message.colors.length > 0)) { 
+              console.log('UI.HTML: Showing Create Styles button based on conditions');
+              showCreateStylesButton(message.colors);
+              
+              // Set a backup interval to check if button is visible
+              if (buttonCheckInterval) {
+                clearInterval(buttonCheckInterval);
+              }
+              
+              buttonCheckInterval = setInterval(() => {
+                const buttonVisible = createStylesButton && 
+                  (getComputedStyle(createStylesButton).display !== 'none' && 
+                   getComputedStyle(createStylesButton).visibility !== 'hidden');
+                
+                if (!buttonVisible) {
+                  console.log('UI.HTML: Button not visible in interval check, trying again');
+                  showCreateStylesButton(extractedColors);
+                } else {
+                  console.log('UI.HTML: Button is now visible, clearing interval');
+                  clearInterval(buttonCheckInterval);
+                }
+              }, 500); // Check every 500ms
+              
+              // Clear the interval after 5 seconds in any case
+              setTimeout(() => {
+                if (buttonCheckInterval) {
+                  clearInterval(buttonCheckInterval);
+                  buttonCheckInterval = null;
+                }
+              }, 5000);
             }
           } else if (message.type === 'error') {
             showMessage(message.message, 'error');
-            messageElement.classList.remove('hidden'); // Show message
           } else if (message.type === 'progress') {
             showMessage(message.message, 'info');
-            messageElement.classList.remove('hidden'); // Show message
           } else {
-            console.log('Unknown message type:', message.type);
+            console.log('UI.HTML: Unknown message type:', message.type);
           }
         } catch (error) {
-          console.error('Error processing message:', error);
+          console.error('UI.HTML: Error processing message:', error);
           showMessage('An error occurred: ' + error.message, 'error');
-          messageElement.classList.remove('hidden');
         }
       };
     </script>
