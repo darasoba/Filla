@@ -5,41 +5,47 @@
       :root {
         --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         
-        /* Light Theme (default) */
+        /* Light Theme (default) - Updated for cohesion */
         --bg-color: #FFFFFF;
         --text-color: #333333;
         --text-color-muted: #666666;
-        --primary-button-bg: #18A0FB;
+        --primary-button-bg: #18A0FB; /* Figma blue */
         --primary-button-text: #FFFFFF;
-        --secondary-button-bg: #F0F0F0;
+        --secondary-button-bg: #F0F7FA; /* Slight teal tint */
         --secondary-button-text: #333333;
+        --border-color: #E0EDF6; /* Unified border color */
+        --steps-bg: #E6F6F8;
+        --steps-text-color: #101010;
+        
+        /* Message colors slightly adjusted for harmony */
         --message-success-bg: #E3F5E9;
         --message-success-text: #1E7F4C;
         --message-error-bg: #FFEBEE;
         --message-error-text: #C62828;
         --message-info-bg: #E3F2FD;
         --message-info-text: #1565C0;
-        --steps-bg: #F5F5F5;
-        --border-color: #E0E0E0;
       }
 
-      html.figma-dark { /* Applied by Figma for dark mode */
-        /* Dark Theme Overrides */
+      html.figma-dark {
+        /* Dark Theme - Updated for cohesion */
         --bg-color: #2C2C2C;
         --text-color: #E0E0E0;
         --text-color-muted: #AAAAAA;
-        /* --primary-button-bg: #18A0FB; /* No change from light, can be omitted here */
-        /* --primary-button-text: #FFFFFF; /* No change from light, can be omitted here */
-        --secondary-button-bg: #424242;
+        --primary-button-bg: #18A0FB; /* Figma blue */
+        --primary-button-text: #FFFFFF;
+        --secondary-button-bg: #383C40; /* Slight teal tint in dark mode */
         --secondary-button-text: #E0E0E0;
+        --border-color: #555555; /* Unified border color */
+        --steps-bg: #383838;
+        --steps-text-color: #E0E0E0;
+        
+        /* Message colors adjusted for dark mode */
         --message-success-bg: #1E7F4C;
         --message-success-text: #E3F5E9;
         --message-error-bg: #C62828;
         --message-error-text: #FFEBEE;
         --message-info-bg: #1565C0;
         --message-info-text: #E3F2FD;
-        --steps-bg: #383838;
-        --border-color: #555555;
       }
 
       body {
@@ -70,20 +76,32 @@
       
       .button-container {
         display: flex;
-        flex-direction: column;
-        gap: 10px; /* Increased gap */
-        margin-top: 20px; /* Adjusted margin */
+        flex-direction: row;
+        gap: 10px;
+        margin-top: 20px;
+        width: 100%; /* Fill the container width */
+      }
+      
+      /* When only one button is visible, it should take full width */
+      .button-container:has(.button-tooltip-wrapper:only-child) .button-tooltip-wrapper {
+        width: 100%;
+      }
+      
+      .button-container:has(button:only-child) button {
+        width: 100%;
       }
       
       button {
-        border: 1px solid transparent; /* Prepare for potential borders */
-        border-radius: 8px; /* Slightly more rounded */
-        padding: 12px 18px; /* Adjusted padding */
+        border: 1px solid transparent;
+        border-radius: 8px;
+        padding: 12px 18px;
         cursor: pointer;
         font-weight: 500;
         transition: background-color 0.2s, opacity 0.2s, border-color 0.2s;
         text-align: center;
-        display: block; /* Ensure buttons display as blocks */
+        display: block;
+        width: 100%; /* Each button fills its flex space */
+        box-sizing: border-box;
       }
       
       button:focus {
@@ -112,6 +130,7 @@
       
       .message {
         margin-top: 20px; /* Adjusted margin */
+        margin-bottom: 20px; /* Adjusted margin */
         padding: 14px;    /* Increased padding */
         border-radius: 8px; /* Consistent rounding */
         font-size: 13px;
@@ -149,7 +168,7 @@
       .steps ol {
         margin: 0;
         padding-left: 20px;
-        color: var(--text-color-muted);
+        color: var(--steps-text-color); /* Use the new variable */
       }
       
       .steps li {
@@ -159,6 +178,67 @@
 
       .steps li:last-child {
         margin-bottom: 0; /* Remove bottom margin from last item */
+      }
+
+      /* Styles for disabled buttons */
+      button:disabled,
+      button.primary-button:disabled,
+      button.secondary-button:disabled {
+        background-color: var(--secondary-button-bg); /* Use a neutral grey background */
+        color: var(--text-color-muted); /* Use muted text color */
+        border-color: var(--border-color); /* Match border to other subtle elements */
+        cursor: not-allowed; /* Indicate non-interactive state */
+        opacity: 0.7; /* Slightly faded to look disabled */
+      }
+
+      button.primary-button:disabled:hover {
+        background-color: var(--secondary-button-bg); /* Keep same background on hover */
+        opacity: 0.7; /* Keep same opacity on hover */
+      }
+
+      button.secondary-button:disabled:hover {
+        background-color: var(--secondary-button-bg); /* Keep same background on hover */
+         opacity: 0.7; /* Keep same opacity on hover */
+      }
+
+      /* Tooltip styles */
+      .button-tooltip-wrapper {
+        position: relative;
+        display: flex; /* Make the wrapper a flex container/item itself */
+        width: 100%; /* Make tooltip wrapper take full width */
+        flex-grow: 1; /* Always allow it to grow */
+        /* flex-grow is set by JS, making this wrapper expand in button-container */
+      }
+
+      .button-tooltip-wrapper:has(> button#extract-button:disabled):hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 105%; /* Position above the wrapper */
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333333; /* Dark background for tooltip */
+        color: #FFFFFF; /* Light text for tooltip */
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 1000; /* Ensure it's above other elements */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        pointer-events: none; /* Tooltip itself should not capture mouse events */
+      }
+
+      /* Optional: Tooltip arrow */
+      .button-tooltip-wrapper:has(> button#extract-button:disabled):hover::before {
+        content: "";
+        position: absolute;
+        bottom: 100%; 
+        left: 50%;
+        transform: translateX(-50%) translateY(5px); /* Position arrow slightly overlapping/below the tooltip body's bottom */
+        border-width: 5px;
+        border-style: solid;
+        border-color: #333333 transparent transparent transparent; /* Arrow pointing up, matches tooltip bg */
+        z-index: 1000;
+        pointer-events: none;
       }
     </style>
   </head>
@@ -177,8 +257,10 @@
     </div>
     
     <div class="button-container">
-      <button id="extract-button" class="primary-button">Extract Colors</button>
-      <button id="create-styles-button" class="secondary-button" style="display: none;">Create Color Styles</button>
+      <span id="extract-button-wrapper" class="button-tooltip-wrapper" data-tooltip="Please select an object on your canvas.">
+        <button id="extract-button" class="primary-button" disabled>Extract Colors</button>
+      </span>
+      <button id="create-styles-button" class="secondary-button" style="display: none;">Create Styles</button>
       <!-- <button id="cancel-button" class="secondary-button">Cancel</button> -->
     </div>
     
@@ -189,6 +271,7 @@
       let buttonCheckInterval; // Variable to store the interval ID for button checks
       
       // Button references
+      const extractButtonWrapper = document.getElementById('extract-button-wrapper'); // Get the wrapper
       const extractButton = document.getElementById('extract-button');
       const createStylesButton = document.getElementById('create-styles-button');
       const cancelButton = document.getElementById('cancel-button');
@@ -259,11 +342,35 @@
                    createStylesButton.style.display,
                    createStylesButton.style.visibility,
                    !createStylesButton.classList.contains('hidden'));
+        updateButtonLayout(); // Update layout after showing button
+      }
+
+      // Function to update button layout based on visibility
+      function updateButtonLayout() {
+        const isCreateStylesVisible = createStylesButton && 
+                                      createStylesButton.style.display !== 'none' && 
+                                      !createStylesButton.classList.contains('hidden');
+        if (extractButtonWrapper) { // Target the wrapper for flexGrow
+          if (isCreateStylesVisible) {
+            extractButtonWrapper.style.flexGrow = '1';
+            if (createStylesButton) createStylesButton.style.flexGrow = '1';
+          } else {
+            extractButtonWrapper.style.flexGrow = '1';
+            extractButtonWrapper.style.width = '100%'; // Ensure full width when alone
+            if (createStylesButton) createStylesButton.style.flexGrow = '0';
+          }
+        }
       }
       
       // Initialize buttons and elements when the page loads
       document.addEventListener('DOMContentLoaded', () => {
         console.log('UI.HTML: DOM fully loaded, initializing elements');
+        
+        // Ensure the extract button wrapper is full width initially
+        if (extractButtonWrapper) {
+          extractButtonWrapper.style.width = '100%';
+          extractButtonWrapper.style.flexGrow = '1';
+        }
         
         // Ensure create-styles-button exists or create it if it doesn't
         if (!document.getElementById('create-styles-button')) {
@@ -303,34 +410,41 @@
                    `display=${getComputedStyle(createStylesButton).display}, 
                     visibility=${getComputedStyle(createStylesButton).visibility}` : 
                    'button not found');
+        updateButtonLayout(); // Set initial layout
       });
       
       // Add event listeners
       extractButton.addEventListener('click', () => {
         // Reset any previous messages
         messageElement.classList.add('hidden');
-        createStylesButton.classList.add('hidden'); // Ensure it's hidden
-        createStylesButton.disabled = true; // And disabled
+        if (createStylesButton) { // Check if createStylesButton exists
+          createStylesButton.classList.add('hidden'); // Ensure it's hidden
+          createStylesButton.style.display = 'none'; // Explicitly hide
+          createStylesButton.disabled = true; // And disabled
+        }
         
         // showMessage('Sending extract-colors request...', 'info');
         // messageElement.classList.remove('hidden');
         
         // Tell the plugin to extract colors
         parent.postMessage({ pluginMessage: { type: 'extract-colors' } }, '*');
+        updateButtonLayout(); // Update layout after hiding button
       });
       
-      createStylesButton.addEventListener('click', () => {
-        // showMessage('Sending create-styles request...', 'info');
-        // messageElement.classList.remove('hidden');
-        
-        // Tell the plugin to create color styles
-        parent.postMessage({ 
-          pluginMessage: { 
-            type: 'create-styles',
-            colors: JSON.stringify(extractedColors)
-          } 
-        }, '*');
-      });
+      if (createStylesButton) { // Check if createStylesButton exists before adding listener
+        createStylesButton.addEventListener('click', () => {
+          // showMessage('Sending create-styles request...', 'info');
+          // messageElement.classList.remove('hidden');
+          
+          // Tell the plugin to create color styles
+          parent.postMessage({ 
+            pluginMessage: { 
+              type: 'create-styles',
+              colors: JSON.stringify(extractedColors)
+            } 
+          }, '*');
+        });
+      }
       
       if (cancelButton) {
         cancelButton.addEventListener('click', () => {
@@ -397,6 +511,12 @@
             showMessage(message.message, 'error');
           } else if (message.type === 'progress') {
             showMessage(message.message, 'info');
+          } else if (message.type === 'selection-state') {
+            if (message.valid) {
+              extractButton.disabled = false;
+            } else {
+              extractButton.disabled = true;
+            }
           } else {
             console.log('UI.HTML: Unknown message type:', message.type);
           }
