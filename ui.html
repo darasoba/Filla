@@ -9,13 +9,14 @@
         --bg-color: #FFFFFF;
         --text-color: #333333;
         --text-color-muted: #666666;
-        --primary-button-bg: #18A0FB; /* Figma blue */
+        --primary-button-bg: #FF2D55; /* Brand color */
         --primary-button-text: #FFFFFF;
-        --secondary-button-bg: #F0F7FA; /* Slight teal tint */
-        --secondary-button-text: #333333;
-        --border-color: #E0EDF6; /* Unified border color */
-        --steps-bg: #E6F6F8;
+        --secondary-button-bg: #FFFFFF; /* White background */
+        --secondary-button-text: #101010; /* Dark text */
+        --border-color: #101010; /* Dark border */
+        --steps-bg: #F0F0F0;
         --steps-text-color: #101010;
+        --steps-border-color: #E5E5E5;
         
         /* Message colors slightly adjusted for harmony */
         --message-success-bg: #E3F5E9;
@@ -31,14 +32,14 @@
         --bg-color: #2C2C2C;
         --text-color: #E0E0E0;
         --text-color-muted: #AAAAAA;
-        --primary-button-bg: #18A0FB; /* Figma blue */
+        --primary-button-bg: #FF2D55; /* Brand color */
         --primary-button-text: #FFFFFF;
-        --secondary-button-bg: #383C40; /* Slight teal tint in dark mode */
-        --secondary-button-text: #E0E0E0;
-        --border-color: #555555; /* Unified border color */
+        --secondary-button-bg: #1E1E1E; /* Dark background */
+        --secondary-button-text: #FFFFFF; /* White text */
+        --border-color: #FFFFFF; /* White border */
         --steps-bg: #383838;
         --steps-text-color: #E0E0E0;
-        
+        --steps-border-color: #555555;
         /* Message colors adjusted for dark mode */
         --message-success-bg: #1E7F4C;
         --message-success-text: #E3F5E9;
@@ -106,7 +107,10 @@
       
       button:focus {
         outline: none;
-        box-shadow: 0 0 0 2px var(--primary-button-bg); /* Focus ring with variable */
+      }
+      
+      .primary-button:focus {
+        box-shadow: 0 0 0 2px var(--primary-button-bg); /* Focus ring only for primary button */
       }
       
       button:hover {
@@ -125,7 +129,13 @@
       }
 
       .secondary-button:hover {
-        background-color: var(--border-color); /* Subtle hover for secondary */
+        background-color: #FFEEF1; /* Light gray hover for light mode */
+        border-color: #FFDFE5;
+      }
+      
+      html.figma-dark .secondary-button:hover {
+        background-color: #4A1F26; /* Dark pink-tinted background for dark mode */
+        border-color: #662A33; /* Darker pink border for dark mode */
       }
       
       .message {
@@ -162,7 +172,7 @@
         padding: 16px; /* Increased padding */
         border-radius: 8px; /* Consistent rounding */
         margin-bottom: 20px; /* Adjusted margin */
-        border: 1px solid var(--border-color); /* Subtle border */
+        border: 1px solid var(--steps-border-color); /* Subtle border */
       }
       
       .steps ol {
@@ -182,24 +192,34 @@
 
       /* Styles for disabled buttons */
       button:disabled,
-      button.primary-button:disabled,
-      button.secondary-button:disabled {
-        background-color: var(--secondary-button-bg); /* Use a neutral grey background */
-        color: var(--text-color-muted); /* Use muted text color */
-        border-color: var(--border-color); /* Match border to other subtle elements */
+      button.primary-button:disabled {
+        background-color: #CCCCCC; /* Light gray background for disabled state in light mode */
+        color: #777777; /* Darker gray text for better contrast */
+        border-color: transparent; /* No border */
         cursor: not-allowed; /* Indicate non-interactive state */
-        opacity: 0.7; /* Slightly faded to look disabled */
+        opacity: 1; /* Full opacity with muted colors */
+      }
+      
+      button.secondary-button:disabled {
+        background-color: #F0F0F0; /* Very light gray background */
+        color: #AAAAAA; /* Medium gray text */
+        border-color: #DDDDDD; /* Light gray border */
+        cursor: not-allowed;
+      }
+      
+      html.figma-dark button:disabled,
+      html.figma-dark button.primary-button:disabled {
+        background-color: #444444; /* Dark gray for dark mode */
+        color: #888888; /* Medium gray text */
+      }
+      
+      html.figma-dark button.secondary-button:disabled {
+        background-color: #333333; /* Dark gray background */
+        color: #777777; /* Medium gray text */
+        border-color: #444444; /* Slightly lighter border */
       }
 
-      button.primary-button:disabled:hover {
-        background-color: var(--secondary-button-bg); /* Keep same background on hover */
-        opacity: 0.7; /* Keep same opacity on hover */
-      }
-
-      button.secondary-button:disabled:hover {
-        background-color: var(--secondary-button-bg); /* Keep same background on hover */
-         opacity: 0.7; /* Keep same opacity on hover */
-      }
+      /* Disabled buttons don't need hover effects */
 
       /* Tooltip styles */
       .button-tooltip-wrapper {
